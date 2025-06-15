@@ -1,0 +1,71 @@
+version: '3.8'
+
+volumes:
+  dbbase:
+
+networks:
+  fipppay_net:
+    driver: bridge
+
+services:
+
+  database:
+    container_name: MySql
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: database
+    ports:
+      - 3306:3306
+    volumes:
+      - dbbase:/var/lib/mysql
+    networks:
+      - fipppay_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # SE PRECISAR USAR É SÓ DESCOMENTAR
+
+  # phpmyadmin:
+  #   container_name: PhpMyAdmin
+  #   image: phpmyadmin
+  #   restart: always
+  #   ports:
+  #     - 8000:80
+  #   networks:
+  #     - fipppay_net
+  #   environment:
+  #     PMA_HOST: database
+  #     PMA_PORT: 3306
+  #     PMA_USER: root
+  #     PMA_PASSWORD: root
+
+  spring-server:
+    container_name: Spring
+    build:
+      context: .
+      dockerfile: Dockerfile-server
+    ports:
+      - 8080:8080
+    networks:
+      - fipppay_net
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3306/database
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: true
+
+  aplication:
+      container_name: aplication
+      build:
+        context: .
+        dockerfile: Dockerfile-app
+      ports:
+        - 3000:3000

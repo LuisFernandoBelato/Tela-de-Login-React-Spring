@@ -1,0 +1,32 @@
+# ETAPA 1 = INSTALAR TODAS AS DEPENDENCIAS - BUILD
+FROM --platform=linux/amd64 node:18-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# ETAPA 2 = COPIAR TODOS OS ARQUIVOS NECESSÁRIOS
+FROM --platform=linux/amd64 node:18-alpine
+
+WORKDIR /app
+COPY --from=builder /app ./
+EXPOSE 3000
+CMD [ "npm", "run", "dev" ]
+
+
+# ESSA ORDEM DEVE SER ASSIM MESMO POIS:
+  # SE O 'RUN npm install' estiver antes do 'COPY . .' 
+  # e sem ter dado o 'COPY package*.json ./'
+    # o Docker sempre executará 'npm install' novamente, mesmo que package.json não tenha mudado. 
+
+  #########################################################################################
+
+# 1 -
+  # "--platform=linux/amd64" Isso Especifica a plataforma que será buildada a imagem
+  # Se não for especificada a imagem será construida com base na arquitetura da própria máquina
+
+# 2 -
+  # "node:18-alpine" é a pré imagem a ser usada, e "alpine" significa ser a variante mais leve
+  # dessa pré imagem

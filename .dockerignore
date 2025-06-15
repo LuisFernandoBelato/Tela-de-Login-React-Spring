@@ -1,0 +1,22 @@
+# ARQUIVOS DO PROJETO PARA SEREM IGNORADOS
+# DURANTE O BUILD DA IMAGEM
+# = FICAR MAIS LEVE
+
+node_modules
+npm-debug.log
+.next
+docker-compose.yml
+.git
+.gitignore
+*.md
+.vscode
+.idea
+dist
+build
+coverage
+logs
+*.log
+*.swp
+.DS_Store
+Thumbs.db
+.idea
